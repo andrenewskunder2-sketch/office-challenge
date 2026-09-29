@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Office Challenge — Andre</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,sans-serif;color:#fff;background:radial-gradient(ellipse at 15% 10%,#416d91,transparent 45%),linear-gradient(135deg,#0c172b,#203c59 55%,#101a2e);padding:16px 12px}
+.app{max-width:540px;margin:auto;padding:22px 18px;border:1px solid #ffffff30;border-radius:22px;background:linear-gradient(145deg,#14283df2,#0c172bf7);box-shadow:0 12px 40px #0007;position:relative}
+header{text-align:center}.logo{font-size:42px}h1{font-size:25px;color:#a9e2ff;margin:8px 0}.sub{font-size:11px;color:#b9cce0;letter-spacing:2px}.author{color:#ffdc8b;font-size:13px;margin:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.pill{background:#ffffff14;padding:9px 12px;border-radius:30px;font-size:13px}
+button{border:0;border-radius:12px;padding:13px;font-size:15px;font-weight:bold;cursor:pointer;color:white;background:#2379bd;width:100%;margin-top:10px}
+button:disabled{opacity:.5}.primary{background:linear-gradient(120deg,#168bd1,#2765bd)}.gold{background:linear-gradient(120deg,#d8a12b,#b87917)}.red{background:linear-gradient(120deg,#d84949,#a91f36)}.muted{background:#344a60}.smallbtn{width:auto;margin:0;padding:9px 12px;font-size:13px}
+.progress{height:8px;background:#ffffff20;border-radius:20px;margin:16px 0;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#50d7d0,#9bffbc);transition:width .3s}
+.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:16px 0}.level{padding:11px 2px;background:#ffffff12;border:1px solid #ffffff1c;border-radius:10px;font-size:12px;text-align:center}.level.active{background:#146a91;border-color:#71d8ff}.level.done{background:#176442}.level.locked{opacity:.4}
+h2{font-size:20px;line-height:1.45}#answers{display:grid;gap:9px}.answer{background:#ffffff0c;border:1px solid #ffffff25;text-align:left;font-weight:normal;margin:0}.answer.correct{background:#16794d}.answer.wrong{background:#b72d43}#feedback{min-height:28px;text-align:center;font-weight:bold;margin:12px 0}.small{font-size:12px;color:#a9bed1;text-align:center;line-height:1.7}
+.hidden{display:none!important}.tools{display:flex;gap:8px}.tools button{flex:1}.modal{position:fixed;inset:0;background:#000d;display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}.modalbox{background:#14283d;border:1px solid #ffffff40;border-radius:18px;padding:16px;max-width:500px;width:100%;text-align:center;max-height:90vh;overflow:auto}.modalbox img{max-width:100%;max-height:65vh;object-fit:contain;border-radius:10px}.footer{text-align:center;color:#8199b0;font-size:12px;margin-top:20px}
+</style></head><body>
+<div class="app">
+<header><div class="logo">🏢💼</div><h1>OFFICE CHALLENGE</h1><div class="sub">PERKANTORAN KNOWLEDGE GAME</div><div class="author">✦ Dibuat oleh Andre ✦</div></header>
+<div class="row"><div class="pill" id="levelLabel">🏆 LEVEL 1</div><div class="row"><div class="pill" id="clueCount">💡 Clue: 0</div><button class="muted smallbtn" id="musicBtn">🎵 Musik: OFF</button></div></div>
+<div class="levels" id="levels"></div><div class="progress"><div class="bar" id="bar"></div></div>
+<div id="screen"><h2 id="question">Selamat datang di Office Challenge!</h2><p class="small" id="description">Selesaikan 5 level dan 50 soal untuk menjadi ahli perkantoran!</p><div id="answers"></div><div id="feedback"></div>
+<div class="tools"><button class="gold hidden" id="hintBtn">💡 Gunakan Clue</button><button class="muted hidden" id="secretBtn" title="Tombol rahasia">🔒</button></div>
+<button class="primary" id="mainBtn">🚀 MULAI GAME</button></div><div class="footer">OFFICE CHALLENGE © 2026 • ANDRE</div></div>
+<div class="modal hidden" id="eggModal"><div class="modalbox"><h2>🥚 EASTER EGG RAHASIA!</h2><img src="easteregg.jpg" alt="Gambar rahasia"><button class="red" id="closeEgg">✖ KELUAR</button></div></div>
+<audio id="music" preload="auto"></audio>
+<script>
+const data = [
+[
+["Apa itu Microsoft Excel?",["Pengolah angka","Editor video","Pemutar musik","Browser"],0],
+["Apa fungsi SUM?",["Menghitung rata-rata","Menjumlahkan angka","Mencari teks","Menghapus sel"],1],
+["Apa fungsi AVERAGE?",["Mencari nilai tertinggi","Mengurutkan data","Menghitung rata-rata","Menghapus angka"],2],
+["Apa tanda awal rumus Excel?",["=","#","@","&"],0],
+["Apa itu cell?",["Folder","Titik pertemuan baris dan kolom","Slide","Dokumen"],1],
+["Apa fungsi MAX?",["Nilai terkecil","Rata-rata","Jumlah data","Nilai terbesar"],3],
+["Apa fungsi MIN?",["Nilai terkecil","Nilai terbesar","Jumlah data","Rata-rata"],0],
+["Apa fungsi COUNT?",["Menghitung sel berisi angka","Menjumlahkan angka","Mencari teks","Menggabungkan sel"],0],
+["Apa ekstensi Excel?",[".docx",".pptx",".xlsx",".jpg"],2],
+["Apa fungsi Filter?",["Menghapus data","Menyaring data","Mencetak dokumen","Mengganti font"],1]],
+[
+["Apa fungsi Microsoft Word?",["Mengolah dokumen teks","Mengedit video","Memutar musik","Mengolah suara"],0],
+["Apa fungsi Ctrl+C?",["Menempelkan","Menyimpan","Menyalin","Mencetak"],2],
+["Apa fungsi Ctrl+V?",["Menempelkan","Menyalin","Membatalkan","Mencetak"],0],
+["Apa fungsi Ctrl+S?",["Membuka file","Menyimpan file","Menutup aplikasi","Mencetak"],1],
+["Apa fungsi Ctrl+Z?",["Mengulang","Mencetak","Membatalkan tindakan","Menyimpan"],2],
+["Apa fungsi Bold?",["Menebalkan teks","Memiringkan teks","Menggarisbawahi","Menghapus teks"],0],
+["Apa fungsi Italic?",["Menebalkan","Memiringkan","Menggarisbawahi","Mewarnai"],1],
+["Apa fungsi Underline?",["Memiringkan","Menebalkan","Memberi garis bawah","Menghapus"],2],
+["Apa ekstensi Word?",[".xlsx",".pptx",".jpg",".docx"],3],
+["Apa fungsi Find?",["Mencari teks","Membuat tabel","Mencetak","Menghapus"],0]],
+[
+["Apa fungsi PowerPoint?",["Mengolah angka","Membuat presentasi","Mengedit suara","Mengelola file"],1],
+["Apa itu slide?",["Halaman presentasi","Lembar angka","Folder","Printer"],0],
+["Apa fungsi Slide Show?",["Menghapus slide","Mengedit angka","Menampilkan presentasi","Menyimpan gambar"],2],
+["Apa fungsi Transition?",["Efek perpindahan slide","Menghitung angka","Menghapus teks","Mencetak"],0],
+["Apa fungsi Animation?",["Mengganti nama file","Memberi efek gerak pada objek","Menghapus slide","Menghitung"],1],
+["Apa ekstensi PowerPoint?",[".docx",".xlsx",".pptx",".txt"],2],
+["Apa fungsi Layout?",["Mengatur tata letak slide","Menghapus file","Menghitung data","Mencetak"],0],
+["Apa fungsi Duplicate Slide?",["Menghapus slide","Menggandakan slide","Menyimpan slide","Mengunci slide"],1],
+["Apa fungsi Notes?",["Mencatat catatan pembicara","Menghapus presentasi","Mengedit video","Menghitung"],0],
+["Apa yang membuat presentasi mudah dibaca?",["Teks sangat kecil","Terlalu banyak warna","Desain jelas dan ringkas","Semua teks tebal"],2]],
+[
+["Apa kepanjangan CPU?",["Central Processing Unit","Computer Personal Unit","Central Program Utility","Control Power Unit"],0],
+["Apa fungsi RAM?",["Menyimpan data sementara","Mencetak dokumen","Menghasilkan suara","Menghubungkan listrik"],0],
+["Apa fungsi keyboard?",["Menampilkan gambar","Memasukkan teks dan perintah","Mencetak","Menyimpan"],1],
+["Apa fungsi mouse?",["Menggerakkan kursor","Merekam suara","Mencetak","Menyimpan"],0],
+["Apa fungsi monitor?",["Mengolah angka","Menampilkan informasi visual","Menyimpan dokumen","Memindai"],1],
+["Apa fungsi printer?",["Menghapus file","Mencetak dokumen","Merekam suara","Mengedit foto"],1],
+["Apa fungsi scanner?",["Memindai dokumen ke bentuk digital","Menghapus file","Mengolah angka","Mencetak"],0],
+["Apa kepanjangan USB?",["Universal Serial Bus","United System Board","Universal Storage Box","User Service Base"],0],
+["Apa fungsi sistem operasi?",["Mengelola perangkat keras dan lunak","Mencetak saja","Mengedit foto saja","Membuat presentasi saja"],0],
+["Apa fungsi Recycle Bin?",["Menyimpan file terhapus sementara","Membuat dokumen","Mengedit foto","Memutar video"],0]],
+[
+["Apa itu email?",["Surat elektronik","Mesin cetak","Program angka","Kabel"],0],
+["Apa fungsi CC dalam email?",["Menghapus penerima","Mengirim salinan kepada penerima lain","Mengganti kata sandi","Menutup email"],1],
+["Apa itu lampiran email?",["Judul email","File yang disertakan dalam email","Alamat pengirim","Kata sandi"],1],
+["Apa itu arsip?",["Kumpulan dokumen yang disimpan teratur","Aplikasi menggambar","Perangkat keras","Pemutar musik"],0],
+["Apa tujuan notulen rapat?",["Mencatat jalannya rapat dan hasilnya","Menghitung gaji","Membuat presentasi","Mengedit foto"],0],
+["Apa itu agenda rapat?",["Daftar hal yang akan dibahas","Daftar belanja","Daftar kata sandi","Daftar aplikasi"],0],
+["Apa fungsi kalender kerja?",["Mengatur jadwal dan kegiatan","Mengedit dokumen","Mencetak","Menghapus file"],0],
+["Apa sikap profesional di kantor?",["Datang tepat waktu dan bertanggung jawab","Mengabaikan tugas","Sering terlambat","Mengganggu rekan"],0],
+["Apa tujuan surat resmi?",["Menyampaikan informasi secara formal","Mengedit video","Menghitung angka","Membuat animasi"],0],
+["Apa yang harus dilakukan sebelum mengirim dokumen penting?",["Memeriksa isi dan penerima","Menghapus judul","Mengirim tanpa membaca","Mengganti semua teks"],0]]
+];
+let level=0,pos=0,score=0,clues=0,locked=false,musicOn=false;
+const $=id=>document.getElementById(id);
+const music=$("music");
+const tracks=["backsound1.mp3","backsound2.mp3","backsound3.mp3"];
+let lastTrack=-1;
+function randomTrack(){
+ let n=Math.floor(Math.random()*tracks.length);
+ if(tracks.length>1&&n===lastTrack)n=(n+1+Math.floor(Math.random()*(tracks.length-1)))%tracks.length;
+ lastTrack=n;return tracks[n];
+}
+async function playRandom(){
+ if(!musicOn)return;
+ music.src=randomTrack();music.volume=.35;
+ try{await music.play()}catch(e){}
+}
+music.addEventListener("ended",playRandom);
+$("musicBtn").onclick=async()=>{
+ musicOn=!musicOn;$("musicBtn").textContent=musicOn?"🎵 Musik: ON":"🔇 Musik: OFF";
+ if(musicOn)await playRandom();else music.pause();
+};
+function beep(freq,dur,type="sine",delay=0){
+ try{let a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(.07,a.currentTime+delay);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+delay+dur);o.connect(g);g.connect(a.destination);o.start(a.currentTime+delay);o.stop(a.currentTime+delay+dur)}catch(e){}
+}
+function soundWin(){[523,659,784,1047].forEach((f,i)=>beep(f,.32,"sine",i*.14))}
+function soundLose(){[330,247,165].forEach((f,i)=>beep(f,.3,"sawtooth",i*.23))}
+function renderLevels(){
+ $("levels").innerHTML="";
+ for(let i=0;i<5;i++){let el=document.createElement("div");el.className="level "+(i<level?"done":i===level?"active":"locked");el.textContent=i<level?"✓ LV "+(i+1):"LV "+(i+1);$("levels").appendChild(el)}
+ $("levelLabel").textContent="🏆 LEVEL "+(level+1);$("clueCount").textContent="💡 Clue: "+clues;
+}
+function startGame(){pos=0;score=0;locked=false;renderLevels();showQuestion()}
+function showQuestion(){
+ locked=false;$("feedback").textContent="";$("answers").innerHTML="";
+ $("mainBtn").classList.add("hidden");$("description").classList.add("hidden");
+ $("hintBtn").classList.remove("hidden");$("secretBtn").classList.remove("hidden");
+ $("hintBtn").disabled=clues<=0;
+ if(pos>=data[level].length){finishLevel();return}
+ let q=data[level][pos];$("question").textContent=q[0];
+ $("bar").style.width=(pos/data[level].length*100)+"%";
+ q[1].forEach((ans,i)=>{let b=document.createElement("button");b.className="answer";b.textContent=String.fromCharCode(65+i)+". "+ans;b.onclick=()=>answerQuestion(i,b);$("answers").appendChild(b)});
+}
+function answerQuestion(choice,btn){
+ if(locked)return;locked=true;
+ let q=data[level][pos],bs=$("answers").querySelectorAll("button");
+ bs.forEach(b=>b.disabled=true);
+ if(choice===q[2]){score++;btn.classList.add("correct");$("feedback").textContent="✅ BENAR!";beep(740,.18);pos++;setTimeout(showQuestion,650)}
+ else{btn.classList.add("wrong");bs[q[2]].classList.add("correct");$("feedback").textContent="❌ SALAH! Jawaban: "+q[1][q[2]];soundLose();setTimeout(loseLevel,1000)}
+}
+$("hintBtn").onclick=()=>{
+ if(clues<=0||locked)return;
+ clues--;renderLevels();$("hintBtn").disabled=true;
+ let q=data[level][pos],bs=$("answers").querySelectorAll("button");
+ // Clue removes two incorrect options.
+ let wrong=[...bs].filter((b,i)=>i!==q[2]);
+ wrong.sort(()=>Math.random()-.5).slice(0,2).forEach(b=>{b.disabled=true;b.style.opacity=".28";b.textContent="✖ Pilihan dihapus"});
+ $("feedback").textContent="💡 Clue digunakan! Dua pilihan salah disingkirkan.";
+};
+function loseLevel(){
+ $("answers").innerHTML="";$("bar").style.width="0%";
+ $("question").textContent="💀 LEVEL GAGAL";$("feedback").textContent="Kamu kalah di Level "+(level+1)+".";
+ $("description").classList.remove("hidden");$("description").textContent="Ulangi level ini dari soal pertama. Progres level sebelumnya tetap aman.";
+ $("hintBtn").classList.add("hidden");$("secretBtn").classList.add("hidden");
+ $("mainBtn").className="red";$("mainBtn").textContent="🔄 ULANGI LEVEL "+(level+1);$("mainBtn").classList.remove("hidden");$("mainBtn").onclick=startGame;
+}
+function finishLevel(){
+ clues++;renderLevels();$("bar").style.width="100%";$("answers").innerHTML="";$("hintBtn").classList.add("hidden");
+ $("question").textContent="🎉 LEVEL "+(level+1)+" SELESAI!";
+ $("feedback").textContent="💡 Kamu mendapat 1 Poin Clue!";
+ $("description").classList.remove("hidden");$("description").textContent="Poin clue bisa dipakai untuk menghapus dua pilihan jawaban yang salah.";
+ soundWin();$("secretBtn").classList.remove("hidden");
+ if(level<4){
+  $("mainBtn").className="gold";$("mainBtn").textContent="➡️ LANJUT LEVEL "+(level+2);$("mainBtn").classList.remove("hidden");
+  $("mainBtn").onclick=()=>{level++;pos=0;score=0;renderLevels();showQuestion()};
+ }else{
+  $("question").textContent="🏆 SELAMAT!";
+  $("description").textContent="Selamat! Kamu telah menyelesaikan 50 soal ini.";
+  $("feedback").textContent="💡 Total Poin Clue: "+clues;
+  $("mainBtn").className="gold";$("mainBtn").textContent="🔄 MAIN LAGI DARI LEVEL 1";$("mainBtn").classList.remove("hidden");
+  $("mainBtn").onclick=()=>{level=0;clues=0;startGame()};
+ }
+}
+$("secretBtn").onclick=()=>{$("eggModal").classList.remove("hidden");};
+$("closeEgg").onclick=()=>{$("eggModal").classList.add("hidden");};
+renderLevels();
+$("mainBtn").onclick=startGame;
+</script></body></html>
